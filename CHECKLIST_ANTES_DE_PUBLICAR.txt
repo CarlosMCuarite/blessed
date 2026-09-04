@@ -1,0 +1,19 @@
+CHECKLIST DE PRODUCCIÓN
+
+[ ] Ejecutar SQL V2 correcto (fresh o upgrade, no ambos).
+[ ] Render /health devuelve ok.
+[ ] Webhook INSERT de reservas devuelve 200.
+[ ] Crear barbero desde Admin funciona.
+[ ] Login de barbero funciona.
+[ ] Permiso de notificaciones aceptado.
+[ ] Registro en dispositivos_usuario aparece.
+[ ] Reserva pública bloquea doble reserva.
+[ ] FCM llega con app cerrada.
+[ ] FCM se muestra con app abierta.
+[ ] Android: configurar firma release con keystore propio.
+[ ] iOS: configurar Team + Bundle ID + Push Notifications.
+[ ] Firebase iOS: subir APNs Authentication Key (.p8).
+[ ] Cambiar nombre/logo/colores de marca antes de publicar.
+[ ] Probar Android físico.
+[ ] Probar iPhone físico.
+[ ] No subir service_role ni service account JSON a Git.

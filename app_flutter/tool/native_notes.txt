@@ -1,0 +1,4 @@
+Los archivos nativos finales dependen de la versión local de Flutter/Xcode/Android Gradle.
+Si faltan archivos de proyecto generados (gradlew, project.pbxproj, storyboards, etc.),
+los scripts PREPARAR_* ejecutan `flutter create` para completarlos usando TU SDK instalado.
+El código Dart profesional se conserva.
