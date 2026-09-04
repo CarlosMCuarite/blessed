@@ -1,0 +1,81 @@
+BLESSED BARBER STUDIO - UN SOLO SERVICIO RENDER
+===============================================
+
+OBJETIVO
+--------
+Un único Render Web Service sirve:
+- Frontend web
+- API Node/Express
+- Webhooks Supabase
+
+NO crear Static Site.
+NO usar Blueprint.
+NO crear segundo Web Service.
+
+ESTRUCTURA
+----------
+backend/
+  server.js
+  package.json
+  public/
+    index.html
+    app.js
+    styles.css
+    config.js
+
+frontend_web/
+  Fuente editable del frontend. NO se despliega como servicio aparte.
+
+RENDER - SERVICIO EXISTENTE
+----------------------------
+Repo: CarlosMCuarite/blessed
+Branch: main
+Root Directory: backend
+Build Command: npm install
+Start Command: npm start
+Plan: Free
+
+Variables:
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+WEBHOOK_SECRET
+PORT=10000
+
+Firebase puede quedar sin configurar por ahora.
+
+URL
+---
+https://blessed-x6m2.onrender.com/
+
+Ahora debe mostrar la interfaz web.
+
+Health:
+https://blessed-x6m2.onrender.com/health
+
+API:
+https://blessed-x6m2.onrender.com/api/...
+
+Webhook:
+https://blessed-x6m2.onrender.com/webhooks/reserva
+
+FLUJO
+-----
+Navegador
+   |
+   v
+Render Web Service (UNICO)
+   |
+   +-- Express static -> frontend
+   +-- /api -> backend
+   +-- /webhooks -> backend
+   |
+   v
+Supabase
+
+CUANDO MODIFIQUES frontend_web
+------------------------------
+Ejecuta:
+ACTUALIZAR_FRONTEND_EN_BACKEND.bat
+
+Luego:
+SUBIR_UN_SOLO_SERVICIO.bat

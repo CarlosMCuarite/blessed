@@ -1,3 +1,13 @@
+
+## Despliegue actual en Render
+
+Este proyecto usa **un solo Web Service**.
+
+- `backend/public/` contiene el frontend que Express sirve en `/`.
+- `backend/server.js` expone la API y webhooks.
+- No crear un Static Site separado.
+- No usar Blueprint.
+
 # SISTEMA DE RESERVAS PARA BARBERÍA — PROFESIONAL V2
 
 Esta entrega reemplaza la interfaz MVP por una estructura profesional y escalable.

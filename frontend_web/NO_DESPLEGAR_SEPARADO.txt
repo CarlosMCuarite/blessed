@@ -1,0 +1,2 @@
+Esta carpeta es la fuente del frontend. Render NO debe crear un Static Site.
+La copia que sirve Express está en backend/public/.

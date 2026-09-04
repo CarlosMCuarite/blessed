@@ -1,0 +1,48 @@
+BLESSED BARBER STUDIO - FRONTEND PROFESIONAL
+=============================================
+
+Este ZIP reemplaza la versión anterior.
+
+ARQUITECTURA
+------------
+UN SOLO Render Web Service:
+
+backend/
+  server.js
+  package.json
+  public/
+    index.html
+    styles.css
+    app.js
+    config.js
+
+El mismo Express sirve:
+- /
+- /health
+- /api/*
+- /webhooks/*
+
+NO crear Static Site.
+NO usar Blueprint.
+
+RENDER EXISTENTE
+----------------
+Root Directory: backend
+Build Command: npm install
+Start Command: npm start
+
+Después de subir a GitHub, Render hará Auto Deploy.
+
+URL actual:
+https://blessed-x6m2.onrender.com/
+
+Frontend:
+https://blessed-x6m2.onrender.com/
+
+Backend health:
+https://blessed-x6m2.onrender.com/health
+
+NOTA
+----
+frontend_web/ se conserva como fuente editable.
+backend/public/ es la versión que Render sirve realmente.

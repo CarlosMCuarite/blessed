@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import crypto from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -9,12 +11,28 @@ import { createClient } from '@supabase/supabase-js';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    const configured = (process.env.FRONTEND_ORIGIN || '')
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
+    if (!origin || configured.length === 0 || configured.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Origen no permitido por CORS'));
+  },
+  methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-webhook-secret'],
+}));
 app.use(express.json({ limit: '256kb' }));
 
 const apiLimiter = rateLimit({
@@ -129,15 +147,6 @@ const passwordSchema = z.object({
   newPassword: z.string().min(8).max(128),
 });
 
-app.get('/', (_req, res) => {
-  res.json({
-    ok: true,
-    system: 'Sistema profesional de reservas para barbería',
-    api: 'online',
-    notifications: messaging ? 'enabled' : 'disabled',
-    health: '/health',
-  });
-});
 
 app.get('/health', (_req, res) => {
   res.json({
@@ -376,8 +385,31 @@ app.post('/api/users/:id/reset-password', requireRoles('super_admin'), async (re
   }
 });
 
-app.use((_req, res) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
+// ------------------------------------------------------------
+// FRONTEND WEB - servido por el MISMO Web Service de Render
+// ------------------------------------------------------------
+const publicDir = path.join(__dirname, 'public');
+app.use(express.static(publicDir, {
+  extensions: ['html'],
+  maxAge: '1h',
+}));
+
+// Las rutas reales del backend deben devolver JSON 404.
+app.use('/api', (_req, res) => {
+  res.status(404).json({ error: 'Ruta API no encontrada' });
+});
+
+app.use('/webhooks', (_req, res) => {
+  res.status(404).json({ error: 'Ruta webhook no encontrada' });
+});
+
+// Fallback SPA / frontend.
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/webhooks/') || req.path === '/health') {
+    return next();
+  }
+  return res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 app.listen(Number(PORT), '0.0.0.0', () => {

@@ -1,6 +1,6 @@
 {
-  "name": "barberia-profesional-api",
-  "version": "2.0.0",
+  "name": "blessed-barberia-fullstack",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "scripts": {

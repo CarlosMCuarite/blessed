@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#11100f">
+  <meta name="description" content="Blessed Barber Studio — reservas online">
+  <title>Blessed Barber Studio</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="grain"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Blessed Barber Studio">
+      <span class="brand-seal" aria-hidden="true">
+        <svg viewBox="0 0 64 64">
+          <path d="M18 42c10-3 18-11 22-22" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M22 46c8-2 16-7 22-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="20" cy="44" r="5" fill="none" stroke="currentColor" stroke-width="3"/>
+          <circle cx="44" cy="20" r="5" fill="none" stroke="currentColor" stroke-width="3"/>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <strong>BLESSED</strong>
+        <em>BARBER STUDIO</em>
+      </span>
+    </a>
+
+    <nav class="top-actions">
+      <span class="open-pill"><i></i> Reservas online</span>
+      <button id="staffBtn" class="btn btn-ghost">Acceso personal</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="publicView" class="page">
+      <div class="hero-shell">
+        <div class="barber-stripe" aria-hidden="true"></div>
+
+        <div class="hero-copy">
+          <span class="eyebrow">BARBERÍA • RESERVAS EN LÍNEA</span>
+          <h1>
+            TU TIEMPO.<br>
+            <span>TU ESTILO.</span><br>
+            TU CITA.
+          </h1>
+          <p>
+            Reserva con tu barbero favorito sin llamadas, sin esperas
+            y con confirmación inmediata.
+          </p>
+
+          <div class="hero-meta">
+            <div>
+              <small>Proceso</small>
+              <strong>4 pasos</strong>
+            </div>
+            <div>
+              <small>Duración</small>
+              <strong>1 hora</strong>
+            </div>
+            <div>
+              <small>Confirmación</small>
+              <strong>Instantánea</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-art">
+          <div class="halo"></div>
+          <div class="monogram">B</div>
+          <div class="hero-card">
+            <span>RESERVA RÁPIDA</span>
+            <strong>Elige. Confirma. Llega.</strong>
+            <small>Nosotros guardamos tu horario.</small>
+          </div>
+        </div>
+      </div>
+
+      <section class="booking-shell">
+        <div class="booking-head">
+          <div>
+            <span class="eyebrow dark">RESERVA TU CITA</span>
+            <h2>Tu próxima visita empieza aquí.</h2>
+          </div>
+          <div class="progress-hint">01 — 04</div>
+        </div>
+
+        <div class="steps">
+          <article class="step-card">
+            <div class="step-num">01</div>
+            <div class="step-title">
+              <span>Profesional</span>
+              <h3>Elige tu barbero</h3>
+            </div>
+            <div id="barbers" class="barber-grid"></div>
+          </article>
+
+          <article class="step-card split">
+            <div>
+              <div class="step-num">02</div>
+              <div class="step-title">
+                <span>Fecha</span>
+                <h3>¿Qué día vienes?</h3>
+              </div>
+              <div class="field date-field">
+                <label for="date">Fecha de la cita</label>
+                <input id="date" type="date">
+              </div>
+            </div>
+
+            <div>
+              <div class="step-num">03</div>
+              <div class="step-title">
+                <span>Horario</span>
+                <h3>Escoge una hora libre</h3>
+              </div>
+              <div id="slots" class="slot-grid">
+                <div class="empty-line">Selecciona primero un barbero.</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="step-card">
+            <div class="step-num">04</div>
+            <div class="step-title">
+              <span>Datos</span>
+              <h3>¿A nombre de quién?</h3>
+            </div>
+
+            <div class="client-grid">
+              <div class="field">
+                <label for="clientName">Nombre completo</label>
+                <input id="clientName" autocomplete="name" placeholder="Ej. Carlos Mendoza">
+              </div>
+              <div class="field">
+                <label for="clientPhone">Teléfono</label>
+                <input id="clientPhone" autocomplete="tel" inputmode="tel" placeholder="Ej. 999 999 999">
+              </div>
+            </div>
+
+            <div class="summary-row">
+              <div id="bookingSummary" class="booking-summary">
+                <span class="summary-kicker">Resumen</span>
+                <strong>Aún no has seleccionado un horario.</strong>
+              </div>
+              <button id="bookBtn" class="btn btn-primary">
+                Confirmar reserva
+                <span>→</span>
+              </button>
+            </div>
+
+            <div id="publicMsg"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="trust-band">
+        <div><span>01</span><strong>Sin cuenta</strong><small>Reserva como cliente invitado.</small></div>
+        <div><span>02</span><strong>Horario real</strong><small>Solo mostramos espacios disponibles.</small></div>
+        <div><span>03</span><strong>Confirmación inmediata</strong><small>Tu cita queda registrada al instante.</small></div>
+      </section>
+    </section>
+
+    <section id="loginView" class="page hidden auth-page">
+      <div class="auth-frame">
+        <aside class="auth-aside">
+          <div class="mini-brand">
+            <span class="brand-seal">✂</span>
+            <span><b>BLESSED</b><small>BARBER STUDIO</small></span>
+          </div>
+          <span class="eyebrow">ÁREA PRIVADA</span>
+          <h2>Gestión simple.<br><em>Servicio impecable.</em></h2>
+          <p>Acceso exclusivo para administración y barberos.</p>
+          <div class="auth-quote">
+            <span>“</span>
+            <p>Una buena experiencia empieza antes de que el cliente se siente en la silla.</p>
+          </div>
+        </aside>
+
+        <div class="auth-card">
+          <button id="backBtn" class="back-link">← Volver a reservas</button>
+          <div class="auth-heading">
+            <span class="eyebrow dark">INICIAR SESIÓN</span>
+            <h2>Bienvenido de nuevo.</h2>
+            <p>Usa tus credenciales del sistema.</p>
+          </div>
+
+          <div class="field">
+            <label for="email">Correo</label>
+            <input id="email" type="email" autocomplete="email" placeholder="admin@blessed.com">
+          </div>
+          <div class="field">
+            <label for="password">Contraseña</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+          </div>
+
+          <button id="loginBtn" class="btn btn-primary full">
+            Entrar al panel <span>→</span>
+          </button>
+
+          <div id="loginMsg"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="staffView" class="page hidden staff-page">
+      <div class="staff-header">
+        <div>
+          <span class="eyebrow dark">PANEL DE CONTROL</span>
+          <h2 id="welcome">Panel</h2>
+          <p id="roleText"></p>
+        </div>
+        <div class="staff-actions">
+          <button id="goPublicBtn" class="btn btn-ghost">Ver reservas</button>
+          <button id="logoutBtn" class="btn btn-dark">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <div id="staffTabs" class="tabs"></div>
+      <div id="staffContent"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <strong>BLESSED BARBER STUDIO</strong>
+      <span>Reservas profesionales • Powered by Supabase + Render</span>
+    </div>
+    <span>© 2026</span>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
