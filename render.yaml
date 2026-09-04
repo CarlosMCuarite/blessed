@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: blessed-barberia-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: SUPABASE_URL
+        value: https://ebqlluyzcmcbrexsrofv.supabase.co
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false

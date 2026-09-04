@@ -14,7 +14,7 @@ app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
 app.use(helmet());
-app.use(cors({ origin: false }));
+app.use(cors());
 app.use(express.json({ limit: '256kb' }));
 
 const apiLimiter = rateLimit({
@@ -36,7 +36,6 @@ const {
 for (const [name, value] of Object.entries({
   SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY,
-  FIREBASE_SERVICE_ACCOUNT_JSON,
   WEBHOOK_SECRET,
 })) {
   if (!value) throw new Error(`Falta variable de entorno: ${name}`);
@@ -52,11 +51,19 @@ const supabase = createClient(
   { auth: { persistSession: false, autoRefreshToken: false } },
 );
 
-initializeApp({
-  credential: cert(JSON.parse(FIREBASE_SERVICE_ACCOUNT_JSON)),
-});
-
-const messaging = getMessaging();
+let messaging = null;
+if (FIREBASE_SERVICE_ACCOUNT_JSON?.trim()) {
+  try {
+    initializeApp({ credential: cert(JSON.parse(FIREBASE_SERVICE_ACCOUNT_JSON)) });
+    messaging = getMessaging();
+    console.log('FCM habilitado.');
+  } catch (error) {
+    console.error('FCM deshabilitado: credencial Firebase inválida.');
+    console.error(error?.message ?? error);
+  }
+} else {
+  console.log('FCM deshabilitado temporalmente. El sistema funciona sin notificaciones.');
+}
 
 function safeSecret(value) {
   if (typeof value !== 'string') return false;
@@ -75,9 +82,7 @@ async function profileFromRequest(req) {
   const token = bearer(req);
   if (!token) return null;
 
-  const { data: auth, error: authError } =
-    await supabase.auth.getUser(token);
-
+  const { data: auth, error: authError } = await supabase.auth.getUser(token);
   if (authError || !auth.user) return null;
 
   const { data: profile, error } = await supabase
@@ -124,11 +129,23 @@ const passwordSchema = z.object({
   newPassword: z.string().min(8).max(128),
 });
 
+app.get('/', (_req, res) => {
+  res.json({
+    ok: true,
+    system: 'Sistema profesional de reservas para barbería',
+    api: 'online',
+    notifications: messaging ? 'enabled' : 'disabled',
+    health: '/health',
+  });
+});
+
 app.get('/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'barberia-profesional-api',
-    version: '2.0.0',
+    version: '2.1.0',
+    supabase: 'configured',
+    notifications: messaging ? 'enabled' : 'disabled',
   });
 });
 
@@ -141,6 +158,15 @@ app.post('/webhooks/reserva', async (req, res) => {
     const payload = req.body;
     if (payload?.type !== 'INSERT' || payload?.table !== 'reservas') {
       return res.json({ ignored: true });
+    }
+
+    if (!messaging) {
+      return res.json({
+        ok: true,
+        sent: 0,
+        notifications: 'disabled',
+        warning: 'Reserva recibida. FCM se habilitará al integrar la app.',
+      });
     }
 
     const reserva = payload.record;
@@ -195,11 +221,7 @@ app.post('/webhooks/reserva', async (req, res) => {
           sound: 'default',
         },
       },
-      apns: {
-        payload: {
-          aps: { sound: 'default' },
-        },
-      },
+      apns: { payload: { aps: { sound: 'default' } } },
     });
 
     const invalidTokenIds = [];
@@ -232,154 +254,132 @@ app.post('/webhooks/reserva', async (req, res) => {
   }
 });
 
-app.post(
-  '/api/users',
-  requireRoles('admin', 'super_admin'),
-  async (req, res) => {
-    try {
-      const parsed = newUserSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({
-          error: parsed.error.issues[0]?.message ?? 'Datos inválidos',
-        });
-      }
-
-      const input = parsed.data;
-      const allowedRoles = req.profile.rol === 'super_admin'
-        ? ['admin', 'barbero']
-        : ['barbero'];
-
-      if (!allowedRoles.includes(input.rol)) {
-        return res.status(403).json({ error: 'No puedes crear ese rol' });
-      }
-
-      const { data: created, error: authError } =
-        await supabase.auth.admin.createUser({
-          email: input.email,
-          password: input.password,
-          email_confirm: true,
-        });
-
-      if (authError) {
-        return res.status(400).json({ error: authError.message });
-      }
-
-      const { error: profileError } = await supabase
-        .from('usuarios')
-        .insert({
-          id: created.user.id,
-          nombre: input.nombre,
-          telefono: input.telefono ?? null,
-          rol: input.rol,
-          activo: true,
-        });
-
-      if (profileError) {
-        await supabase.auth.admin.deleteUser(created.user.id);
-        return res.status(400).json({ error: profileError.message });
-      }
-
-      res.status(201).json({
-        id: created.user.id,
-        email: input.email,
-        nombre: input.nombre,
-        rol: input.rol,
+app.post('/api/users', requireRoles('admin', 'super_admin'), async (req, res) => {
+  try {
+    const parsed = newUserSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.issues[0]?.message ?? 'Datos inválidos',
       });
-    } catch (error) {
-      console.error('create user', error);
-      res.status(500).json({ error: 'No se pudo crear el usuario' });
     }
-  },
-);
 
-app.patch(
-  '/api/users/:id',
-  requireRoles('admin', 'super_admin'),
-  async (req, res) => {
-    try {
-      const parsed = editUserSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({
-          error: parsed.error.issues[0]?.message ?? 'Datos inválidos',
-        });
-      }
+    const input = parsed.data;
+    const allowedRoles = req.profile.rol === 'super_admin'
+      ? ['admin', 'barbero']
+      : ['barbero'];
 
-      const { data: target, error } = await supabase
-        .from('usuarios')
-        .select('id,rol')
-        .eq('id', req.params.id)
-        .single();
-
-      if (error) return res.status(404).json({ error: 'Usuario no encontrado' });
-
-      if (req.profile.rol === 'admin' && target.rol !== 'barbero') {
-        return res.status(403).json({ error: 'Admin solo puede editar barberos' });
-      }
-
-      const { data, error: updateError } = await supabase
-        .from('usuarios')
-        .update(parsed.data)
-        .eq('id', req.params.id)
-        .select('id,nombre,rol,telefono,activo')
-        .single();
-
-      if (updateError) {
-        return res.status(400).json({ error: updateError.message });
-      }
-
-      res.json(data);
-    } catch (error) {
-      console.error('edit user', error);
-      res.status(500).json({ error: 'No se pudo editar el usuario' });
+    if (!allowedRoles.includes(input.rol)) {
+      return res.status(403).json({ error: 'No puedes crear ese rol' });
     }
-  },
-);
 
-app.post(
-  '/api/users/:id/reset-password',
-  requireRoles('super_admin'),
-  async (req, res) => {
-    try {
-      const parsed = passwordSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({
-          error: parsed.error.issues[0]?.message ?? 'Contraseña inválida',
-        });
-      }
+    const { data: created, error: authError } =
+      await supabase.auth.admin.createUser({
+        email: input.email,
+        password: input.password,
+        email_confirm: true,
+      });
 
-      const { data: target, error } = await supabase
-        .from('usuarios')
-        .select('rol')
-        .eq('id', req.params.id)
-        .single();
+    if (authError) return res.status(400).json({ error: authError.message });
 
-      if (error) return res.status(404).json({ error: 'Usuario no encontrado' });
-      if (!['admin', 'barbero'].includes(target.rol)) {
-        return res.status(403).json({ error: 'Operación no permitida' });
-      }
+    const { error: profileError } = await supabase.from('usuarios').insert({
+      id: created.user.id,
+      nombre: input.nombre,
+      telefono: input.telefono ?? null,
+      rol: input.rol,
+      activo: true,
+    });
 
-      const { error: updateError } =
-        await supabase.auth.admin.updateUserById(
-          req.params.id,
-          { password: parsed.data.newPassword },
-        );
-
-      if (updateError) {
-        return res.status(400).json({ error: updateError.message });
-      }
-
-      res.json({ ok: true });
-    } catch (error) {
-      console.error('reset password', error);
-      res.status(500).json({ error: 'No se pudo actualizar la contraseña' });
+    if (profileError) {
+      await supabase.auth.admin.deleteUser(created.user.id);
+      return res.status(400).json({ error: profileError.message });
     }
-  },
-);
+
+    res.status(201).json({
+      id: created.user.id,
+      email: input.email,
+      nombre: input.nombre,
+      rol: input.rol,
+    });
+  } catch (error) {
+    console.error('create user', error);
+    res.status(500).json({ error: 'No se pudo crear el usuario' });
+  }
+});
+
+app.patch('/api/users/:id', requireRoles('admin', 'super_admin'), async (req, res) => {
+  try {
+    const parsed = editUserSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.issues[0]?.message ?? 'Datos inválidos',
+      });
+    }
+
+    const { data: target, error } = await supabase
+      .from('usuarios')
+      .select('id,rol')
+      .eq('id', req.params.id)
+      .single();
+
+    if (error) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    if (req.profile.rol === 'admin' && target.rol !== 'barbero') {
+      return res.status(403).json({ error: 'Admin solo puede editar barberos' });
+    }
+
+    const { data, error: updateError } = await supabase
+      .from('usuarios')
+      .update(parsed.data)
+      .eq('id', req.params.id)
+      .select('id,nombre,rol,telefono,activo')
+      .single();
+
+    if (updateError) return res.status(400).json({ error: updateError.message });
+    res.json(data);
+  } catch (error) {
+    console.error('edit user', error);
+    res.status(500).json({ error: 'No se pudo editar el usuario' });
+  }
+});
+
+app.post('/api/users/:id/reset-password', requireRoles('super_admin'), async (req, res) => {
+  try {
+    const parsed = passwordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.issues[0]?.message ?? 'Contraseña inválida',
+      });
+    }
+
+    const { data: target, error } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', req.params.id)
+      .single();
+
+    if (error) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!['admin', 'barbero'].includes(target.rol)) {
+      return res.status(403).json({ error: 'Operación no permitida' });
+    }
+
+    const { error: updateError } =
+      await supabase.auth.admin.updateUserById(
+        req.params.id,
+        { password: parsed.data.newPassword },
+      );
+
+    if (updateError) return res.status(400).json({ error: updateError.message });
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('reset password', error);
+    res.status(500).json({ error: 'No se pudo actualizar la contraseña' });
+  }
+});
 
 app.use((_req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
 app.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`Barbería API v2 escuchando en ${PORT}`);
+  console.log(`Barbería API v2.1 escuchando en ${PORT}`);
 });

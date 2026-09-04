@@ -25,7 +25,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,
-    publishableKey: AppConfig.supabasePublishableKey,
+    anonKey: AppConfig.supabasePublishableKey,
   );
 
   await NotificationService.initialize();
