@@ -27,6 +27,9 @@ const ui = {
   },
   initials(name) {
     return String(name || 'B').trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+  },
+  scrollToBooking() {
+    $('bookingArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 };
 
@@ -34,29 +37,30 @@ function updateSummary() {
   const el = $('bookingSummary');
   if (!selectedBarber || !selectedSlot) {
     el.innerHTML = `
-      <span class="summary-kicker">Resumen</span>
-      <strong>Aún no has seleccionado un horario.</strong>`;
+      <span>Resumen</span>
+      <strong>Aún no seleccionaste un horario.</strong>`;
     return;
   }
   el.innerHTML = `
-    <span class="summary-kicker">Resumen</span>
+    <span>Resumen</span>
     <strong>${selectedBarber.nombre} · ${$('date').value} · ${ui.hhmm(selectedSlot.hora_inicio)}</strong>`;
 }
 
 async function loadBarbers() {
-  $('barbers').innerHTML = `<div class="empty-line">Cargando profesionales...</div>`;
+  $('barbers').innerHTML = '<div class="empty-state">Cargando profesionales...</div>';
   const { data, error } = await sb.rpc('listar_barberos_publicos');
 
   if (error) {
-    $('barbers').innerHTML = `<div class="empty-line">No pudimos cargar los barberos.</div>`;
+    $('barbers').innerHTML = '<div class="empty-state">No pudimos cargar los barberos.</div>';
     return;
   }
 
   $('barbers').innerHTML = '';
+
   for (const b of data) {
     const card = document.createElement('button');
-    card.className = 'barber-card';
     card.type = 'button';
+    card.className = 'barber-card';
     card.innerHTML = `
       <span class="avatar">${ui.initials(b.nombre)}</span>
       <span>
@@ -77,7 +81,7 @@ async function loadBarbers() {
   }
 
   if (!data.length) {
-    $('barbers').innerHTML = `<div class="empty-line">Todavía no hay barberos activos.</div>`;
+    $('barbers').innerHTML = '<div class="empty-state">Todavía no hay barberos activos.</div>';
   }
 }
 
@@ -86,18 +90,19 @@ async function loadSlots() {
   updateSummary();
 
   if (!selectedBarber) {
-    $('slots').innerHTML = `<div class="empty-line">Selecciona primero un barbero.</div>`;
+    $('slots').innerHTML = '<div class="empty-state">Selecciona primero un barbero.</div>';
     return;
   }
 
-  $('slots').innerHTML = `<div class="empty-line">Consultando horarios...</div>`;
+  $('slots').innerHTML = '<div class="empty-state">Consultando horarios...</div>';
+
   const { data, error } = await sb.rpc('horarios_disponibles', {
     p_barbero_id: selectedBarber.id,
     p_fecha: $('date').value
   });
 
   if (error) {
-    $('slots').innerHTML = `<div class="empty-line">No pudimos consultar los horarios.</div>`;
+    $('slots').innerHTML = '<div class="empty-state">No pudimos consultar los horarios.</div>';
     return;
   }
 
@@ -120,7 +125,7 @@ async function loadSlots() {
   }
 
   if (!data.length) {
-    $('slots').innerHTML = `<div class="empty-line">No hay horarios libres para esa fecha.</div>`;
+    $('slots').innerHTML = '<div class="empty-state">No hay horarios libres para esa fecha.</div>';
   }
 }
 
@@ -140,7 +145,7 @@ $('bookBtn').onclick = async () => {
   if (phone.replace(/\D/g, '').length < 6) return ui.notice($('publicMsg'), 'Ingresa un teléfono válido.');
 
   $('bookBtn').disabled = true;
-  $('bookBtn').innerHTML = 'Registrando cita...';
+  $('bookBtn').textContent = 'Registrando...';
 
   const { error } = await sb.rpc('crear_reserva_publica', {
     p_barbero_id: selectedBarber.id,
@@ -151,14 +156,11 @@ $('bookBtn').onclick = async () => {
   });
 
   $('bookBtn').disabled = false;
-  $('bookBtn').innerHTML = `Confirmar reserva <span>→</span>`;
+  $('bookBtn').textContent = 'Confirmar reserva';
 
-  if (error) {
-    return ui.notice($('publicMsg'), error.message);
-  }
+  if (error) return ui.notice($('publicMsg'), error.message);
 
-  ui.notice(
-    $('publicMsg'),
+  ui.notice($('publicMsg'),
     `Reserva confirmada con ${selectedBarber.nombre} a las ${ui.hhmm(selectedSlot.hora_inicio)}.`,
     true
   );
@@ -168,9 +170,17 @@ $('bookBtn').onclick = async () => {
   await loadSlots();
 };
 
-$('staffBtn').onclick = () => ui.show('loginView');
-$('backBtn').onclick = () => ui.show('publicView');
-$('goPublicBtn').onclick = () => ui.show('publicView');
+function openLogin() { ui.show('loginView'); }
+function openHome() { ui.show('publicView'); }
+
+$('staffBtn').onclick = openLogin;
+$('heroLoginBtn').onclick = openLogin;
+$('directLoginBtn').onclick = openLogin;
+$('backBtn').onclick = openHome;
+$('goPublicBtn').onclick = openHome;
+$('goHomeBtn').onclick = openHome;
+$('goBookingBtn').onclick = () => { ui.show('publicView'); setTimeout(()=>ui.scrollToBooking(), 50); };
+$('heroBookingBtn').onclick = () => { ui.show('publicView'); setTimeout(()=>ui.scrollToBooking(), 50); };
 
 $('loginBtn').onclick = async () => {
   ui.notice($('loginMsg'), '');
@@ -183,7 +193,7 @@ $('loginBtn').onclick = async () => {
   });
 
   $('loginBtn').disabled = false;
-  $('loginBtn').innerHTML = `Entrar al panel <span>→</span>`;
+  $('loginBtn').textContent = 'Ingresar al panel';
 
   if (error) return ui.notice($('loginMsg'), error.message);
 
@@ -218,7 +228,6 @@ async function api(path, options = {}) {
       ...(options.headers || {})
     }
   });
-
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error || 'Error del servidor');
   return body;
@@ -233,7 +242,6 @@ function openStaff() {
 
 function renderTabs() {
   const role = profile.rol;
-
   const tabs = role === 'barbero'
     ? [['agenda', 'Mi agenda'], ['horarios', 'Disponibilidad']]
     : role === 'admin'
@@ -246,13 +254,11 @@ function renderTabs() {
     const b = document.createElement('button');
     b.className = `tab${i === 0 ? ' active' : ''}`;
     b.textContent = label;
-
     b.onclick = () => {
       [...$('staffTabs').children].forEach(x => x.classList.remove('active'));
       b.classList.add('active');
       renderSection(id);
     };
-
     $('staffTabs').appendChild(b);
   });
 
@@ -260,8 +266,7 @@ function renderTabs() {
 }
 
 async function renderSection(id) {
-  $('staffContent').innerHTML = `<div class="panel-card">Cargando...</div>`;
-
+  $('staffContent').innerHTML = '<div class="panel-card">Cargando...</div>';
   try {
     if (id === 'agenda') return renderBarberAgenda();
     if (id === 'horarios') return renderAvailability();
@@ -276,14 +281,8 @@ async function renderSection(id) {
 }
 
 async function getReservations() {
-  let q = sb
-    .from('reservas')
-    .select('*')
-    .order('fecha', { ascending: true })
-    .order('hora_inicio', { ascending: true });
-
+  let q = sb.from('reservas').select('*').order('fecha', { ascending: true }).order('hora_inicio', { ascending: true });
   if (profile.rol === 'barbero') q = q.eq('barbero_id', profile.id);
-
   const { data, error } = await q;
   if (error) throw error;
   return data;
@@ -306,7 +305,7 @@ async function renderBarberAgenda() {
     <div class="panel-card">
       <h3>Próximas citas</h3>
       <div class="panel-list">
-        ${rows.map(reservationItem).join('') || '<div class="empty-line">Sin citas programadas.</div>'}
+        ${rows.map(reservationItem).join('') || '<div class="empty-state">Sin citas programadas.</div>'}
       </div>
     </div>`;
 }
@@ -327,20 +326,29 @@ async function renderAvailability() {
     <div class="panel-card">
       <h3>Disponibilidad semanal</h3>
 
-      <div class="client-grid" style="margin-top:16px">
+      <div class="form-grid" style="margin-top:16px">
         <div class="field">
           <label>Día</label>
-          <select id="avDay">${days.map((d, i) => `<option value="${i}">${d}</option>`).join('')}</select>
+          <input id="avDayText" value="0 = Dom, 1 = Lun, 2 = Mar, 3 = Mié, 4 = Jue, 5 = Vie, 6 = Sáb" disabled>
         </div>
         <div class="field">
           <label>Hora</label>
-          <select id="avHour">
-            ${Array.from({length:12}, (_,i)=>i+8).map(h=>`<option value="${h}">${String(h).padStart(2,'0')}:00</option>`).join('')}
-          </select>
+          <input id="avHourText" value="Selecciona en los controles inferiores" disabled>
         </div>
       </div>
 
-      <button id="addAv" class="btn btn-primary" style="margin-top:14px">Agregar horario</button>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field">
+          <label>Día</label>
+          <input id="avDay" type="number" min="0" max="6" value="1">
+        </div>
+        <div class="field">
+          <label>Hora de inicio (08 a 19)</label>
+          <input id="avHour" type="number" min="8" max="19" value="9">
+        </div>
+      </div>
+
+      <button id="addAv" class="btn btn-dark" style="margin-top:14px">Agregar horario</button>
 
       <div class="panel-list">
         ${data.map(s => `
@@ -350,20 +358,19 @@ async function renderAvailability() {
               <small>${ui.hhmm(s.hora_inicio)} – ${ui.hhmm(s.hora_fin)}</small>
             </div>
             <button class="btn btn-ghost" data-del="${s.id}">Eliminar</button>
-          </div>`).join('') || '<div class="empty-line">Todavía no configuraste horarios.</div>'}
+          </div>`).join('') || '<div class="empty-state">Todavía no configuraste horarios.</div>'}
       </div>
     </div>`;
 
   $('addAv').onclick = async () => {
     const h = +$('avHour').value;
-
+    const d = +$('avDay').value;
     const { error } = await sb.from('disponibilidad').insert({
       barbero_id: profile.id,
-      dia_semana: +$('avDay').value,
+      dia_semana: d,
       hora_inicio: `${String(h).padStart(2, '0')}:00:00`,
       hora_fin: `${String(h + 1).padStart(2, '0')}:00:00`
     });
-
     if (error) return alert(error.message);
     renderAvailability();
   };
@@ -383,38 +390,32 @@ async function renderAdminSummary() {
 
   $('staffContent').innerHTML = `
     <div class="kpis">
-      <div class="kpi"><span>Citas de hoy</span><b>${reservations.filter(r => r.fecha === today).length}</b><small>Agenda actual</small></div>
-      <div class="kpi"><span>Reservas</span><b>${reservations.length}</b><small>Registros visibles</small></div>
+      <div class="kpi"><span>Citas de hoy</span><b>${reservations.filter(r => r.fecha === today).length}</b><small>Agenda del día</small></div>
+      <div class="kpi"><span>Reservas</span><b>${reservations.length}</b><small>Total visible</small></div>
       <div class="kpi"><span>Barberos activos</span><b>${(barbers || []).filter(b => b.activo).length}</b><small>Equipo disponible</small></div>
     </div>`;
 }
 
 async function renderReservations() {
   const rows = await getReservations();
-
   $('staffContent').innerHTML = `
     <div class="panel-card">
       <h3>Todas las reservas</h3>
       <div class="panel-list">
-        ${rows.map(reservationItem).join('') || '<div class="empty-line">No hay reservas todavía.</div>'}
+        ${rows.map(reservationItem).join('') || '<div class="empty-state">No hay reservas todavía.</div>'}
       </div>
     </div>`;
 }
 
 async function renderBarbersAdmin() {
-  const { data, error } = await sb
-    .from('usuarios')
-    .select('*')
-    .eq('rol', 'barbero')
-    .order('nombre');
-
+  const { data, error } = await sb.from('usuarios').select('*').eq('rol', 'barbero').order('nombre');
   if (error) throw error;
 
   $('staffContent').innerHTML = `
     <div class="panel-card">
-      <div class="staff-header" style="margin:0">
-        <div><h3>Barberos</h3></div>
-        <button id="newBarber" class="btn btn-primary">Nuevo barbero</button>
+      <div class="staff-header" style="margin-bottom:0">
+        <div><h2 style="font-size:30px">Barberos</h2></div>
+        <button id="newBarber" class="btn btn-dark">Nuevo barbero</button>
       </div>
       <div class="panel-list">
         ${data.map(u => `
@@ -424,7 +425,7 @@ async function renderBarbersAdmin() {
               <small>${u.telefono || 'Sin teléfono'}</small>
             </div>
             <span class="pill">${u.activo ? 'activo' : 'inactivo'}</span>
-          </div>`).join('') || '<div class="empty-line">Sin barberos.</div>'}
+          </div>`).join('') || '<div class="empty-state">Sin barberos.</div>'}
       </div>
     </div>`;
 
@@ -437,11 +438,10 @@ async function renderUsers() {
 
   $('staffContent').innerHTML = `
     <div class="panel-card">
-      <div class="staff-header" style="margin:0">
-        <div><h3>Usuarios del sistema</h3></div>
-        <button id="newAdmin" class="btn btn-primary">Nuevo admin</button>
+      <div class="staff-header" style="margin-bottom:0">
+        <div><h2 style="font-size:30px">Usuarios del sistema</h2></div>
+        <button id="newAdmin" class="btn btn-dark">Nuevo admin</button>
       </div>
-
       <div class="panel-list">
         ${data.filter(u => u.rol !== 'super_admin').map(u => `
           <div class="panel-item">
@@ -450,7 +450,7 @@ async function renderUsers() {
               <small>${u.rol} · ${u.telefono || 'Sin teléfono'}</small>
             </div>
             <span class="pill">${u.activo ? 'activo' : 'inactivo'}</span>
-          </div>`).join('') || '<div class="empty-line">Sin usuarios adicionales.</div>'}
+          </div>`).join('') || '<div class="empty-state">Sin usuarios adicionales.</div>'}
       </div>
     </div>`;
 
@@ -460,13 +460,10 @@ async function renderUsers() {
 async function userDialog(role) {
   const name = prompt(`Nombre del ${role}:`);
   if (!name) return;
-
   const email = prompt('Correo:');
   if (!email) return;
-
   const password = prompt('Contraseña inicial (mínimo 8 caracteres):');
   if (!password) return;
-
   const phone = role === 'barbero' ? prompt('Teléfono:') : '';
 
   try {
@@ -480,7 +477,6 @@ async function userDialog(role) {
         rol: role
       })
     });
-
     alert('Usuario creado correctamente.');
     renderSection(role === 'barbero' ? 'barberos' : 'usuarios');
   } catch (e) {
@@ -489,12 +485,7 @@ async function userDialog(role) {
 }
 
 async function renderSecurity() {
-  const { data, error } = await sb
-    .from('usuarios')
-    .select('*')
-    .in('rol', ['admin', 'barbero'])
-    .order('nombre');
-
+  const { data, error } = await sb.from('usuarios').select('*').in('rol', ['admin', 'barbero']).order('nombre');
   if (error) throw error;
 
   $('staffContent').innerHTML = `
@@ -508,7 +499,7 @@ async function renderSecurity() {
               <small>${u.rol}</small>
             </div>
             <button class="btn btn-ghost" data-reset="${u.id}">Cambiar contraseña</button>
-          </div>`).join('') || '<div class="empty-line">Sin usuarios para administrar.</div>'}
+          </div>`).join('') || '<div class="empty-state">Sin usuarios para administrar.</div>'}
       </div>
     </div>`;
 
@@ -516,7 +507,6 @@ async function renderSecurity() {
     b.onclick = async () => {
       const pw = prompt('Nueva contraseña (mínimo 8 caracteres):');
       if (!pw) return;
-
       try {
         await api(`/api/users/${b.dataset.reset}/reset-password`, {
           method: 'POST',
@@ -532,9 +522,9 @@ async function renderSecurity() {
 
 (async () => {
   await loadBarbers();
+  updateSummary();
 
   const { data } = await sb.auth.getSession();
-
   if (data.session) {
     const { data: p } = await sb
       .from('usuarios')

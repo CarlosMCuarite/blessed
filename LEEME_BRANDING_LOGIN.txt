@@ -1,0 +1,27 @@
+BLESSED BARBER STUDIO - BRANDING + LOGIN MEJORADO
+=================================================
+
+CAMBIOS PRINCIPALES
+-------------------
+- Login mucho más visible.
+- Diseño menos genérico.
+- Uso del logo real de Blessed Barber Studio.
+- Uso de los banners proporcionados por el usuario.
+- Frontend y backend siguen funcionando en UN SOLO Web Service Render.
+
+RUTAS
+-----
+/              -> home + reservas
+/health        -> health del backend
+/api/...       -> API
+/webhooks/...  -> webhooks
+
+IMPORTANTE
+----------
+Después de reemplazar tu proyecto local por este ZIP:
+
+1. Haz git add .
+2. git commit -m "Actualizar branding y login Blessed"
+3. git push origin main
+
+Render hará auto deploy.
