@@ -1,6 +1,11 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { CONFIG } from '/config.js';
-
+// Supabase se sirve localmente desde node_modules a través de Express.
+// Esto evita que Helmet/CSP dependa de ejecutar módulos externos.
+if (!window.supabase?.createClient) {
+  document.body.innerHTML = '<div style="font-family:system-ui;padding:40px"><h2>No se pudo cargar Supabase</h2><p>Verifica /vendor/supabase/supabase.js en Render.</p></div>';
+  throw new Error('Supabase browser SDK no disponible');
+}
+const { createClient } = window.supabase;
+const CONFIG = window.__BLESSED_CONFIG__;
 const sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 const routes = CONFIG.ROUTES;
@@ -621,17 +626,41 @@ async function renderDashboard(){
 }
 
 function renderReservationChart(rows){
-  const ctx=$('dashboardChart')?.getContext('2d');if(!ctx)return;
-  if(dashboardChart)dashboardChart.destroy();
+  const canvas=$('dashboardChart'); if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const ratio=window.devicePixelRatio||1;
+  const rect=canvas.getBoundingClientRect();
+  const width=Math.max(320,Math.floor(rect.width||700));
+  const height=Math.max(180,Math.floor(rect.height||256));
+  canvas.width=width*ratio; canvas.height=height*ratio;
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+  ctx.clearRect(0,0,width,height);
+
   const days=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(6-i));return d.toISOString().slice(0,10)});
   const values=days.map(day=>rows.filter(r=>r.fecha===day).length);
-  dashboardChart=new Chart(ctx,{
-    type:'line',
-    data:{labels:days.map(d=>d.split('-').reverse().slice(0,2).join('/')),datasets:[{
-      label:'Reservas',data:values,borderColor:settings.color_primario||'#B89454',backgroundColor:'rgba(184,148,84,.12)',fill:true,tension:.4,borderWidth:2,pointRadius:3
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}
-  });
+  const max=Math.max(1,...values);
+  const pad={l:34,r:14,t:18,b:30};
+  const w=width-pad.l-pad.r, h=height-pad.t-pad.b;
+
+  ctx.strokeStyle='#eef2f7';ctx.lineWidth=1;ctx.fillStyle='#94a3b8';ctx.font='10px system-ui';
+  for(let i=0;i<=4;i++){
+    const y=pad.t+h-(h*i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(width-pad.r,y);ctx.stroke();
+    ctx.fillText(String(Math.round(max*i/4)),4,y+3);
+  }
+
+  const primary=settings.color_primario||'#B89454';
+  const pts=values.map((v,i)=>({x:pad.l+(w*(i/(values.length-1||1))),y:pad.t+h-(h*v/max)}));
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+h);grad.addColorStop(0,hexToRgba(primary,.22));grad.addColorStop(1,hexToRgba(primary,0));
+  ctx.beginPath();ctx.moveTo(pts[0].x,pad.t+h);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,pad.t+h);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=primary;ctx.lineWidth=2.2;ctx.stroke();
+  pts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fillStyle=primary;ctx.fill();ctx.fillStyle='#94a3b8';ctx.textAlign='center';ctx.fillText(days[i].split('-').slice(1).reverse().join('/'),p.x,height-8)});
+  ctx.textAlign='start';
+}
+function hexToRgba(hex,a){
+  const h=String(hex||'#B89454').replace('#','');
+  const full=h.length===3?h.split('').map(x=>x+x).join(''):h.padEnd(6,'0');
+  const n=parseInt(full,16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
 }
 
 /* RESERVAS */

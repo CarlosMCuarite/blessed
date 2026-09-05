@@ -1,3 +1,13 @@
+/* Critical route visibility independent of Tailwind runtime */
+.hidden{display:none!important}
+.font-display{font-family:'Bebas Neue',Impact,sans-serif}
+.animate-fade-in{animation:fadeIn .3s ease}
+.animate-slide-up{animation:slideUp .3s cubic-bezier(.22,1,.36,1)}
+.animate-pop{animation:pop .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+
 :root{
   --color-primary:#B89454;
   --color-primary-dark:#80612E;

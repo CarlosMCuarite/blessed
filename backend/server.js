@@ -19,20 +19,24 @@ app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
 app.use(helmet({
+  // El frontend ya NO ejecuta Tailwind ni Supabase desde CDNs.
+  // JavaScript de aplicación y SDK de Supabase se sirven desde este mismo dominio.
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      // app.js importa el SDK de Supabase como módulo ES desde jsdelivr.
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdn.tailwindcss.com'],
-      // Auth/REST/Storage de Supabase (y Realtime por WebSocket).
+      scriptSrc: ["'self'"],
+      scriptSrcElem: ["'self'"],
       connectSrc: ["'self'", 'https://*.supabase.co', 'wss://*.supabase.co'],
-      // Fotos del catálogo y banners: pueden venir de Supabase Storage.
-      imgSrc: ["'self'", 'data:', 'https:'],
-      // El panel usa atributos style="" inline en varias vistas.
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      frameAncestors: ["'self'"],
     },
   },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 app.use(cors({
   origin: (origin, callback) => {
@@ -413,6 +417,21 @@ app.post('/api/users/:id/reset-password', requireRoles('super_admin'), async (re
 // FRONTEND WEB - servido por el MISMO Web Service de Render
 // ------------------------------------------------------------
 const publicDir = path.join(__dirname, 'public');
+
+// SDK navegador de Supabase servido localmente desde la dependencia npm.
+// Evita fallos de CSP/Helmet por módulos externos de jsDelivr.
+const supabaseBrowserDir = path.join(
+  __dirname,
+  'node_modules',
+  '@supabase',
+  'supabase-js',
+  'dist',
+  'umd',
+);
+app.use('/vendor/supabase', express.static(supabaseBrowserDir, {
+  maxAge: '7d',
+  immutable: true,
+}));
 app.use(express.static(publicDir, {
   extensions: ['html'],
   maxAge: '1h',

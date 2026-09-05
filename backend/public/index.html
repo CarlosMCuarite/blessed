@@ -10,35 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Sora','system-ui','sans-serif'],
-        serif: ['Playfair Display','Georgia','serif'],
-        display: ['Bebas Neue','sans-serif']
-      },
-      colors: {
-        gold: { DEFAULT:'#B89454', light:'#E6D3A6', dark:'#80612E', pale:'rgba(184,148,84,.12)' }
-      },
-      animation: {
-        'fade-in':'fadeIn .3s ease',
-        'slide-up':'slideUp .3s cubic-bezier(.22,1,.36,1)',
-        'pop':'pop .25s cubic-bezier(.34,1.56,.64,1)'
-      },
-      keyframes: {
-        fadeIn:{from:{opacity:0},to:{opacity:1}},
-        slideUp:{from:{opacity:0,transform:'translateY(16px)'},to:{opacity:1,transform:'translateY(0)'}},
-        pop:{from:{transform:'scale(.9)',opacity:0},to:{transform:'scale(1)',opacity:1}}
-      }
-    }
-  }
-}
-</script>
 
+<link rel="stylesheet" href="/tailwind.generated.css">
 <link rel="stylesheet" href="/styles.css">
 </head>
 
@@ -488,6 +461,8 @@ tailwind.config = {
 <div id="modalRoot"></div>
 <div id="toastContainer" class="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none"></div>
 
-<script type="module" src="/app.js"></script>
+<script src="/config.js"></script>
+<script src="/vendor/supabase/supabase.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>

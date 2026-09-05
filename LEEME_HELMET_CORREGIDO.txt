@@ -1,0 +1,19 @@
+BLESSED - CORRECCION HELMET / CSP
+
+Problema corregido:
+- El frontend dependía de Tailwind Play CDN y de Supabase como módulo ESM externo.
+- Helmet aplicaba una Content-Security-Policy estricta.
+- Si cualquiera de esos scripts no ejecutaba, app.js no inicializaba el router y todas las vistas quedaban con class=hidden.
+
+Cambios:
+1. Tailwind se compila a /tailwind.generated.css y ya no se ejecuta en el navegador.
+2. Supabase browser SDK se sirve desde node_modules en /vendor/supabase/supabase.js.
+3. app.js y config.js son scripts locales clásicos.
+4. Chart.js fue eliminado; el gráfico usa Canvas nativo.
+5. Helmet CSP permite solo scripts self y conexiones a Supabase.
+6. .hidden existe también en styles.css para no depender de Tailwind runtime.
+
+Render no cambia:
+Root Directory: backend
+Build Command: npm install
+Start Command: npm start
