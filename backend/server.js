@@ -23,14 +23,14 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       // app.js importa el SDK de Supabase como módulo ES desde jsdelivr.
-      scriptSrc: ["'self'", 'https://cdn.jsdelivr.net'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdn.tailwindcss.com'],
       // Auth/REST/Storage de Supabase (y Realtime por WebSocket).
       connectSrc: ["'self'", 'https://*.supabase.co', 'wss://*.supabase.co'],
       // Fotos del catálogo y banners: pueden venir de Supabase Storage.
       imgSrc: ["'self'", 'data:', 'https:'],
       // El panel usa atributos style="" inline en varias vistas.
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      fontSrc: ["'self'", 'data:'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
     },
   },
 }));
@@ -173,7 +173,7 @@ app.get('/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'barberia-profesional-api',
-    version: '3.0.0',
+    version: '3.1.0',
     supabase: 'configured',
     notifications: messaging ? 'enabled' : 'disabled',
   });
@@ -437,5 +437,5 @@ app.use((req, res, next) => {
 });
 
 app.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`Barbería API v3.0 escuchando en ${PORT}`);
+  console.log(`Barbería API v3.1 escuchando en ${PORT}`);
 });

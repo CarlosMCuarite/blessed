@@ -1,289 +1,493 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="es" class="h-full">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#11100f">
-  <meta name="description" content="Blessed Barber Studio">
-  <title>Blessed Barber Studio</title>
-  <link rel="stylesheet" href="/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+<title>Blessed Barber Studio</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Sora','system-ui','sans-serif'],
+        serif: ['Playfair Display','Georgia','serif'],
+        display: ['Bebas Neue','sans-serif']
+      },
+      colors: {
+        gold: { DEFAULT:'#B89454', light:'#E6D3A6', dark:'#80612E', pale:'rgba(184,148,84,.12)' }
+      },
+      animation: {
+        'fade-in':'fadeIn .3s ease',
+        'slide-up':'slideUp .3s cubic-bezier(.22,1,.36,1)',
+        'pop':'pop .25s cubic-bezier(.34,1.56,.64,1)'
+      },
+      keyframes: {
+        fadeIn:{from:{opacity:0},to:{opacity:1}},
+        slideUp:{from:{opacity:0,transform:'translateY(16px)'},to:{opacity:1,transform:'translateY(0)'}},
+        pop:{from:{transform:'scale(.9)',opacity:0},to:{transform:'scale(1)',opacity:1}}
+      }
+    }
+  }
+}
+</script>
+
+<link rel="stylesheet" href="/styles.css">
 </head>
-<body>
-  <div id="toastRoot" class="toast-root"></div>
 
-  <!-- PUBLIC NAV -->
-  <header id="publicNav" class="public-nav">
-    <button class="brand-link" data-route="/">
-      <img id="navLogo" src="/assets/logo_blessed.png" alt="Blessed Barber Studio">
-    </button>
+<body class="h-full bg-gray-50 font-sans text-gray-800 antialiased">
 
-    <nav class="public-links">
-      <button data-route="/" data-nav="/">Inicio</button>
-      <button data-route="/catalogo" data-nav="/catalogo">Catálogo</button>
-      <button data-route="/reservar" data-nav="/reservar">Reservar</button>
-      <button data-route="/login" data-nav="/login" id="navLogin" class="login-nav-btn">Login</button>
-      <button data-route="/panel" data-nav="/panel" id="navPanel" class="login-nav-btn hidden">Panel</button>
-    </nav>
+<!-- ========================================================= -->
+<!-- PUBLIC SHELL                                              -->
+<!-- ========================================================= -->
+<div id="publicShell">
+  <header class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
+      <button data-route="/" class="flex items-center gap-3">
+        <img id="publicNavLogo" src="/assets/logo_blessed.png" class="h-10 sm:h-11 w-auto max-w-[210px] object-contain" alt="Blessed">
+      </button>
+      <nav class="ml-auto flex items-center gap-1 overflow-x-auto">
+        <button data-route="/" data-public-nav="/" class="public-nav-item">Inicio</button>
+        <button data-route="/catalogo" data-public-nav="/catalogo" class="public-nav-item">Catálogo</button>
+        <button data-route="/reservar" data-public-nav="/reservar" class="public-nav-item">Reservar</button>
+        <button id="publicLoginBtn" data-route="/login" data-public-nav="/login" class="public-nav-item public-nav-login">Login</button>
+        <button id="publicPanelBtn" data-route="/panel" class="public-nav-item public-nav-login hidden">Panel</button>
+      </nav>
+    </div>
   </header>
 
   <!-- HOME -->
-  <section id="homeView" class="route-view hidden">
-    <div class="home-wrap">
-      <section class="home-hero">
-        <div class="home-copy">
-          <span class="gold-kicker" id="homeBrand">BLESSED BARBER STUDIO</span>
-          <h1 id="heroTitle">TU ESTILO,<br><em>TU MEJOR VERSIÓN</em></h1>
-          <p id="heroSubtitle">
-            Cortes modernos, barba, perfilado y una experiencia profesional.
-            Reserva online sin esperas.
-          </p>
-          <div class="hero-actions">
-            <button class="btn gold" data-route="/reservar" id="homeCta">RESERVA TU CITA</button>
-            <button class="btn outline-light" data-route="/catalogo">VER CATÁLOGO</button>
-          </div>
-          <div class="home-mini-grid">
-            <div><b>Reserva fácil</b><span>Sin cuenta</span></div>
-            <div><b>Horario real</b><span>Sin cruces</span></div>
-            <div><b>Equipo profesional</b><span>Elige tu barbero</span></div>
-          </div>
-        </div>
-        <div class="home-photo">
-          <img id="heroBanner" src="/assets/banner_dark.png" alt="Blessed Barber Studio">
-        </div>
-      </section>
+  <section id="homePage" class="public-page hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div class="grid lg:grid-cols-2 overflow-hidden rounded-3xl bg-gray-900 shadow-2xl min-h-[590px]">
+        <div class="relative p-8 sm:p-12 lg:p-16 flex flex-col justify-center text-white overflow-hidden">
+          <div class="absolute inset-0 opacity-[.05]" style="background-image:radial-gradient(circle at 2px 2px, white 1px, transparent 0);background-size:28px 28px"></div>
+          <div class="absolute -top-32 -left-20 w-96 h-96 rounded-full opacity-10" style="background:radial-gradient(circle,var(--color-primary),transparent 70%)"></div>
 
-      <section class="intro-section">
-        <div class="section-title">
-          <span>EXPERIENCIA BLESSED</span>
-          <h2>Un sistema pensado para la barbería,<br>no para llenar la pantalla de módulos.</h2>
-        </div>
-        <div class="feature-cards">
-          <article><span>01</span><h3>Reservas</h3><p>Flujo guiado por servicio, barbero, fecha, hora y datos del cliente.</p></article>
-          <article><span>02</span><h3>Barberos</h3><p>Perfiles profesionales, especialidad, foto, biografía y disponibilidad semanal.</p></article>
-          <article><span>03</span><h3>Catálogo</h3><p>Servicios y trabajos visuales de Blessed sin inventario ni productos.</p></article>
-        </div>
-      </section>
+          <div class="relative z-10">
+            <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[.25em] text-gold-light/70 font-semibold mb-5">
+              <span class="w-2 h-2 rounded-full bg-gold"></span>
+              <span id="homeBusinessLabel">BLESSED BARBER STUDIO</span>
+            </span>
+            <h1 id="homeHeroTitle" class="font-serif text-5xl sm:text-6xl xl:text-7xl font-bold leading-[.95] tracking-tight">
+              Tu estilo,<br><span class="text-gold">tu mejor versión.</span>
+            </h1>
+            <p id="homeHeroText" class="mt-6 text-gray-400 leading-7 max-w-xl">
+              Reserva online, elige a tu barbero y llega directo a tu cita.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <button data-route="/reservar" class="bg-primary hover:bg-primary-dark text-white px-5 py-3 rounded-xl text-sm font-semibold shadow-lg transition">
+                Reservar una cita
+              </button>
+              <button data-route="/catalogo" class="border border-gray-700 hover:bg-gray-800 text-gray-200 px-5 py-3 rounded-xl text-sm font-semibold transition">
+                Ver catálogo
+              </button>
+            </div>
 
-      <section class="brand-feature">
-        <img id="homeSecondaryBanner" src="/assets/banner_light.png" alt="Blessed">
-        <div>
-          <span class="dark-kicker">ESTILO • PRECISIÓN • ELEGANCIA</span>
-          <h2 id="businessSlogan">Tu estilo, tu mejor versión</h2>
-          <p>
-            Toda la identidad del sistema se puede modificar desde Configuración:
-            nombre, textos, colores, logo, banners, redes, teléfono y dirección.
-          </p>
-          <button class="btn dark" data-route="/reservar">AGENDAR CITA</button>
+            <div class="grid grid-cols-3 gap-3 mt-10 max-w-lg">
+              <div class="border border-gray-800 rounded-xl p-3">
+                <div class="text-lg font-bold text-white">24/7</div>
+                <div class="text-[10px] text-gray-500 mt-1">Reservas online</div>
+              </div>
+              <div class="border border-gray-800 rounded-xl p-3">
+                <div class="text-lg font-bold text-white">1 h</div>
+                <div class="text-[10px] text-gray-500 mt-1">Bloques de cita</div>
+              </div>
+              <div class="border border-gray-800 rounded-xl p-3">
+                <div class="text-lg font-bold text-white">100%</div>
+                <div class="text-[10px] text-gray-500 mt-1">En la nube</div>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
+
+        <div class="relative min-h-[430px] lg:min-h-[590px] bg-black">
+          <img id="homeHeroBanner" src="/assets/banner_dark.png" class="absolute inset-0 w-full h-full object-cover" alt="Blessed Barber Studio">
+          <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/20 to-transparent lg:block hidden"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-transparent"></div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mt-6">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-xl mb-4">📅</div>
+          <h3 class="font-semibold text-sm text-gray-900">Reservas simples</h3>
+          <p class="text-xs text-gray-500 leading-5 mt-2">Servicio, barbero, fecha, hora y datos del cliente. Nada más.</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-4">✂️</div>
+          <h3 class="font-semibold text-sm text-gray-900">Equipo profesional</h3>
+          <p class="text-xs text-gray-500 leading-5 mt-2">Cada barbero administra su disponibilidad y su propia agenda.</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl mb-4">💈</div>
+          <h3 class="font-semibold text-sm text-gray-900">Catálogo de servicios</h3>
+          <p class="text-xs text-gray-500 leading-5 mt-2">Servicios, estilos y galería de trabajos de Blessed.</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- PUBLIC CATALOG -->
-  <section id="catalogView" class="route-view hidden public-page">
-    <div class="public-page-header">
-      <div>
-        <span class="dark-kicker">CATÁLOGO</span>
-        <h1 id="catalogTitle">Servicios Blessed</h1>
-        <p id="catalogSubtitle">Elige el servicio que mejor va contigo.</p>
-      </div>
-      <button class="btn dark" data-route="/reservar">Reservar ahora</button>
-    </div>
-
-    <div id="publicServices" class="service-public-grid"></div>
-
-    <div class="catalog-divider">
-      <span>GALERÍA</span>
-      <h2>Trabajos recientes</h2>
-    </div>
-    <div id="publicGallery" class="gallery-public-grid"></div>
-  </section>
-
-  <!-- RESERVATION ROUTE -->
-  <section id="bookingView" class="route-view hidden booking-page">
-    <div class="booking-shell">
-      <div class="booking-top">
+  <!-- CATALOGO -->
+  <section id="catalogPage" class="public-page hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-7">
+      <div class="flex flex-col sm:flex-row gap-4 sm:items-end sm:justify-between mb-6">
         <div>
-          <span class="dark-kicker">RESERVA ONLINE</span>
-          <h1>Reserva tu cita</h1>
-          <p>Selecciona cada paso para continuar.</p>
+          <div class="text-[10px] uppercase tracking-[.2em] text-gold-dark font-bold mb-2">CATÁLOGO</div>
+          <h1 id="catalogTitle" class="font-serif text-4xl sm:text-5xl font-bold text-gray-900">Servicios Blessed</h1>
+          <p id="catalogSubtitle" class="text-sm text-gray-500 mt-2">Cortes, barba y cuidado profesional.</p>
         </div>
-        <img id="bookingLogo" src="/assets/logo_blessed.png" alt="Blessed">
+        <button data-route="/reservar" class="bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-semibold">Reservar ahora</button>
       </div>
 
-      <div class="booking-stepper">
-        <div class="progress-bars">
-          <i id="prog1"></i><i id="prog2"></i><i id="prog3"></i><i id="prog4"></i>
-        </div>
+      <div id="publicServices" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
 
-        <!-- STEP 1 -->
-        <div id="reserveStep1" class="reserve-step">
-          <div class="reserve-heading">
-            <span>01</span>
-            <div><small>SERVICIO</small><h2>¿Qué te hacemos hoy?</h2></div>
-          </div>
-          <div id="reserveServices" class="service-select-grid"></div>
-        </div>
-
-        <!-- STEP 2 -->
-        <div id="reserveStep2" class="reserve-step hidden">
-          <button class="step-back" data-back-step="1">← Volver</button>
-          <div class="reserve-heading">
-            <span>02</span>
-            <div><small>BARBERO</small><h2>Elige tu profesional</h2></div>
-          </div>
-          <div id="reserveBarbers" class="barber-select-grid"></div>
-        </div>
-
-        <!-- STEP 3 -->
-        <div id="reserveStep3" class="reserve-step hidden">
-          <button class="step-back" data-back-step="2">← Volver</button>
-          <div class="reserve-heading">
-            <span>03</span>
-            <div><small>FECHA Y HORA</small><h2>¿Cuándo vienes?</h2></div>
-          </div>
-
-          <div class="booking-date-row">
-            <label class="field">
-              <b>Fecha</b>
-              <input id="date" type="date">
-            </label>
-          </div>
-
-          <p class="mini-label">HORARIOS DISPONIBLES</p>
-          <div id="slots" class="slot-grid"></div>
-          <button id="continueToClient" class="btn dark full reserve-next" disabled>Continuar →</button>
-        </div>
-
-        <!-- STEP 4 -->
-        <div id="reserveStep4" class="reserve-step hidden">
-          <button class="step-back" data-back-step="3">← Volver</button>
-          <div class="reserve-heading">
-            <span>04</span>
-            <div><small>DATOS DEL CLIENTE</small><h2>Último paso</h2></div>
-          </div>
-
-          <div class="form-grid">
-            <label class="field"><b>Nombre</b><input id="clientName" placeholder="Tu nombre"></label>
-            <label class="field"><b>Teléfono</b><input id="clientPhone" inputmode="tel" placeholder="+51 999 999 999"></label>
-          </div>
-
-          <label class="field reserve-notes">
-            <b>Nota opcional</b>
-            <input id="clientNotes" placeholder="Ej. fade bajo, llevaré una referencia...">
-          </label>
-
-          <div id="bookingSummary" class="summary-card"></div>
-          <button id="bookBtn" class="btn gold full">CONFIRMAR RESERVA</button>
-          <div id="publicMsg"></div>
-        </div>
-
-        <!-- SUCCESS -->
-        <div id="reserveSuccess" class="reserve-step hidden success-panel">
-          <div class="success-icon">✓</div>
-          <span class="dark-kicker">RESERVA CONFIRMADA</span>
-          <h2>¡Listo!</h2>
-          <p>Tu cita quedó registrada.</p>
-          <div id="successSummary" class="summary-card"></div>
-          <button id="newBookingBtn" class="btn dark full">Hacer otra reserva</button>
-        </div>
+      <div class="mt-12 mb-5">
+        <div class="text-[10px] uppercase tracking-[.2em] text-gold-dark font-bold">GALERÍA</div>
+        <h2 class="font-serif text-3xl font-bold mt-1">Trabajos recientes</h2>
       </div>
-
-      <aside class="booking-brand-side">
-        <img id="bookingBanner" src="/assets/banner_dark.png" alt="Blessed Barber Studio">
-        <div>
-          <small id="bookingBusinessName">BLESSED BARBER STUDIO</small>
-          <h3 id="bookingHours">Atención con reserva previa</h3>
-          <p id="bookingAddress">Configura dirección y contacto desde el panel.</p>
-        </div>
-      </aside>
+      <div id="publicGallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
     </div>
   </section>
 
-  <!-- LOGIN -->
-  <section id="loginView" class="route-view hidden login-route">
-    <div class="login-frame">
-      <div class="login-visual">
-        <img id="loginBanner" src="/assets/banner_dark.png" alt="Blessed Barber Studio">
-        <div class="login-visual-overlay">
-          <img id="loginOverlayLogo" src="/assets/logo_blessed.png" alt="Blessed">
-          <p id="loginVisualSlogan">Tu estilo, tu mejor versión</p>
+  <!-- RESERVAR: formato inspirado directamente en reservar.html -->
+  <section id="bookingPage" class="public-page hidden">
+    <div id="bookingHero" class="hero-gradient text-white relative overflow-hidden">
+      <div class="barber-pole-mini barber-pole-mini-left"><div class="bp-stripes"></div></div>
+      <div class="barber-pole-mini barber-pole-mini-right"><div class="bp-stripes"></div></div>
+
+      <div class="max-w-xl mx-auto px-4 py-8 text-center relative z-10">
+        <div class="w-20 h-20 rounded-2xl bg-black/20 backdrop-blur border border-white/10 flex items-center justify-center mx-auto mb-4 shadow-xl overflow-hidden p-2">
+          <img id="reserveHeroLogo" src="/assets/logo_blessed.png" class="w-full h-full object-contain brightness-0 invert" alt="Blessed">
         </div>
-      </div>
-
-      <div class="login-form-panel">
-        <button class="back-link" data-route="/">← Volver al inicio</button>
-        <img id="loginLogo" src="/assets/logo_blessed.png" alt="Blessed" class="login-logo">
-        <span class="dark-kicker">ACCESO DEL PERSONAL</span>
-        <h1 id="loginTitle">Bienvenido</h1>
-        <p id="loginSubtitle">Ingresa con tu correo y contraseña.</p>
-
-        <div id="loginMsg"></div>
-
-        <label class="field">
-          <b>Correo electrónico</b>
-          <input id="email" type="email" autocomplete="email" placeholder="admin@blessed.com">
-        </label>
-
-        <label class="field password-field">
-          <b>Contraseña</b>
-          <span class="password-wrap">
-            <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
-            <button id="togglePassword" type="button">Ver</button>
+        <h1 id="reserveHeroName" class="font-display text-4xl tracking-widest mb-1">BLESSED</h1>
+        <p id="reserveHeroTagline" class="text-white/70 text-sm mb-4 font-medium">✂ Reserva tu cita aquí</p>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <span class="inline-flex items-center gap-1.5 bg-black/15 backdrop-blur rounded-full px-3 py-1.5 text-xs font-semibold border border-white/10">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>Reservas abiertas
           </span>
-        </label>
+          <span id="reserveCity" class="inline-flex items-center gap-1 bg-black/15 backdrop-blur rounded-full px-3 py-1.5 text-xs font-semibold border border-white/10">📍 Perú</span>
+          <span class="inline-flex items-center gap-1 bg-black/15 backdrop-blur rounded-full px-3 py-1.5 text-xs font-semibold border border-white/10">✂️ Profesionales</span>
+        </div>
+      </div>
+    </div>
 
-        <button id="loginBtn" class="btn dark full">INGRESAR AL SISTEMA</button>
-        <p class="login-note">Los clientes no necesitan iniciar sesión para reservar.</p>
+    <div class="max-w-xl mx-auto px-4 -mt-4 pb-16 relative z-20">
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100">
+          <div class="flex gap-1.5 mb-2">
+            <div id="reserveBar1" class="step-bar h-1.5 rounded-full flex-1 active"></div>
+            <div id="reserveBar2" class="step-bar h-1.5 rounded-full flex-1"></div>
+            <div id="reserveBar3" class="step-bar h-1.5 rounded-full flex-1"></div>
+            <div id="reserveBar4" class="step-bar h-1.5 rounded-full flex-1"></div>
+          </div>
+          <p id="reserveStepText" class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Paso 1 de 4 · Elige un servicio</p>
+        </div>
+
+        <div class="p-4 sm:p-5">
+          <div id="reserveStep1" class="reserve-step">
+            <h2 class="font-semibold text-lg text-gray-900 mb-1">¿Qué servicio deseas?</h2>
+            <p class="text-xs text-gray-400 mb-4">Selecciona una opción para continuar.</p>
+            <div id="reserveServices" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+
+          <div id="reserveStep2" class="reserve-step hidden">
+            <button data-back-reserve="1" class="text-xs text-gray-400 hover:text-gray-700 mb-4">← Volver</button>
+            <h2 class="font-semibold text-lg text-gray-900 mb-1">Elige tu barbero</h2>
+            <p class="text-xs text-gray-400 mb-4">Selecciona con quién deseas atenderte.</p>
+            <div id="reserveBarbers" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+
+          <div id="reserveStep3" class="reserve-step hidden">
+            <button data-back-reserve="2" class="text-xs text-gray-400 hover:text-gray-700 mb-4">← Volver</button>
+            <h2 class="font-semibold text-lg text-gray-900 mb-1">Fecha y hora</h2>
+            <p class="text-xs text-gray-400 mb-4">Solo mostramos horarios realmente libres.</p>
+
+            <label class="block mb-4">
+              <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Fecha</span>
+              <input id="reserveDate" type="date" class="mt-1.5 w-full px-4 py-3 border border-gray-200 rounded-xl text-sm">
+            </label>
+
+            <div class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Horarios disponibles</div>
+            <div id="reserveSlots" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
+
+            <button id="reserveContinue" disabled class="mt-5 w-full bg-primary disabled:bg-gray-200 disabled:text-gray-400 text-white py-3 rounded-xl text-sm font-semibold transition">Continuar</button>
+          </div>
+
+          <div id="reserveStep4" class="reserve-step hidden">
+            <button data-back-reserve="3" class="text-xs text-gray-400 hover:text-gray-700 mb-4">← Volver</button>
+            <h2 class="font-semibold text-lg text-gray-900 mb-1">Tus datos</h2>
+            <p class="text-xs text-gray-400 mb-4">No necesitas crear una cuenta.</p>
+
+            <div class="space-y-3">
+              <div>
+                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Nombre</label>
+                <input id="clientName" class="mt-1.5 w-full px-4 py-3 border border-gray-200 rounded-xl text-sm" placeholder="Tu nombre completo">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Teléfono</label>
+                <input id="clientPhone" class="mt-1.5 w-full px-4 py-3 border border-gray-200 rounded-xl text-sm" placeholder="+51 999 999 999">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Nota opcional</label>
+                <textarea id="clientNotes" rows="2" class="mt-1.5 w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none" placeholder="Ej. fade bajo..."></textarea>
+              </div>
+            </div>
+
+            <div id="bookingSummary" class="mt-4 p-4 rounded-xl bg-gray-50 border border-gray-100"></div>
+            <button id="bookBtn" class="mt-4 w-full bg-primary text-white py-3 rounded-xl text-sm font-semibold shadow-lg hover:bg-primary-dark">Confirmar reserva</button>
+            <div id="publicMsg"></div>
+          </div>
+
+          <div id="reserveSuccess" class="hidden text-center py-6 animate-pop">
+            <div class="w-20 h-20 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-4xl mx-auto mb-5">✓</div>
+            <h2 class="font-serif text-3xl font-bold text-gray-900">¡Reserva confirmada!</h2>
+            <p class="text-sm text-gray-400 mt-2">Tu cita quedó registrada correctamente.</p>
+            <div id="successSummary" class="mt-5 p-4 rounded-xl bg-gray-50 border border-gray-100 text-left"></div>
+            <button id="newBookingBtn" class="mt-5 w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-semibold">Hacer otra reserva</button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- INTERNAL APP -->
-  <section id="panelView" class="route-view hidden internal-shell">
-    <div id="sidebarOverlay" class="sidebar-overlay hidden"></div>
+  <!-- LOGIN: misma composición del otro proyecto -->
+  <section id="loginPage" class="public-page hidden">
+    <div class="min-h-[calc(100vh-64px)] flex">
+      <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden flex-col items-center justify-center p-12">
+        <div class="absolute inset-0 opacity-5" style="background-image:radial-gradient(circle at 2px 2px, white 1px, transparent 0);background-size:32px 32px"></div>
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full opacity-10" style="background:radial-gradient(circle,var(--color-primary),transparent 70%)"></div>
 
-    <aside id="sidebar" class="sidebar">
-      <div class="sidebar-brand">
-        <img id="sidebarLogo" src="/assets/logo_blessed.png" alt="Blessed">
-        <div><strong id="sidebarName">Blessed</strong><small id="sidebarRole">Sistema</small></div>
+        <div class="relative z-10 text-center">
+          <div class="w-28 h-28 rounded-2xl bg-white/95 flex items-center justify-center mx-auto mb-6 shadow-2xl p-3 overflow-hidden">
+            <img id="loginBrandLogo" src="/assets/logo_blessed.png" class="w-full h-full object-contain" alt="Blessed">
+          </div>
+          <h1 id="loginBrandName" class="font-serif text-4xl font-bold text-white mb-2">Blessed Barber Studio</h1>
+          <p id="loginBrandSlogan" class="text-gray-400 text-sm mb-12">Tu estilo, tu mejor versión</p>
+
+          <div class="grid grid-cols-3 gap-6 text-center">
+            <div><div class="text-2xl font-bold text-white mb-1">100%</div><div class="text-xs text-gray-500">En la nube</div></div>
+            <div><div class="text-2xl font-bold text-white mb-1">24/7</div><div class="text-xs text-gray-500">Disponible</div></div>
+            <div><div class="text-2xl font-bold text-white mb-1">∞</div><div class="text-xs text-gray-500">Reservas</div></div>
+          </div>
+        </div>
       </div>
 
-      <nav id="sidebarNav" class="sidebar-nav"></nav>
+      <div class="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white">
+        <div class="w-full max-w-md animate-fade-in">
+          <div class="lg:hidden text-center mb-8">
+            <img id="loginMobileLogo" src="/assets/logo_blessed.png" class="h-20 w-auto max-w-[280px] object-contain mx-auto mb-3" alt="Blessed">
+          </div>
 
-      <div class="sidebar-user">
-        <div class="user-avatar" id="sidebarAvatar">B</div>
-        <div class="sidebar-user-copy">
-          <b id="sidebarUserName">Usuario</b>
-          <span id="sidebarUserRole">rol</span>
+          <button data-route="/" class="text-xs text-gray-400 hover:text-gray-700 mb-8">← Volver al inicio</button>
+          <h2 id="loginTitle" class="text-2xl font-semibold text-gray-900 mb-1">Bienvenido</h2>
+          <p id="loginSubtitle" class="text-gray-500 text-sm mb-8">Ingresa con tu correo y contraseña</p>
+
+          <div id="loginMsg"></div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Correo electrónico</label>
+              <input id="loginEmail" type="email" placeholder="admin@blessed.com" autocomplete="email" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Contraseña</label>
+              <div class="relative">
+                <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" class="w-full px-4 py-3 pr-14 border border-gray-200 rounded-xl text-sm transition">
+                <button id="togglePassword" type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-gray-400 hover:text-gray-700 px-2 py-1">VER</button>
+              </div>
+            </div>
+            <button id="loginBtn" class="w-full bg-primary text-white py-3.5 rounded-xl text-sm font-semibold shadow-lg hover:bg-primary-dark transition">Ingresar al sistema</button>
+          </div>
+
+          <div class="mt-7 text-center text-xs text-gray-400">
+            Los clientes no necesitan iniciar sesión para reservar.
+          </div>
         </div>
-        <button id="sidebarLogout" title="Cerrar sesión">↪</button>
       </div>
-    </aside>
-
-    <div class="internal-main">
-      <header class="internal-topbar">
-        <button id="mobileSidebarBtn" class="mobile-menu-btn">☰</button>
-        <div class="page-heading">
-          <h2 id="pageTitle">Dashboard</h2>
-          <p id="pageSubtitle">Vista general</p>
-        </div>
-        <div class="topbar-actions">
-          <button id="topActionBtn" class="btn dark compact hidden">+ Nuevo</button>
-          <button data-route="/reservar" class="btn ghost compact">Portal</button>
-        </div>
-      </header>
-
-      <main id="staffContent" class="internal-content"></main>
     </div>
   </section>
 
-  <footer id="publicFooter" class="public-footer">
-    <img id="footerLogo" src="/assets/logo_blessed.png" alt="Blessed">
-    <div><strong id="footerName">Blessed Barber Studio</strong><span id="footerText">Sistema profesional de reservas.</span></div>
+  <footer id="publicFooter" class="border-t border-gray-100 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row gap-3 sm:items-center">
+      <img id="footerLogo" src="/assets/logo_blessed.png" class="h-10 w-auto max-w-[200px] object-contain" alt="Blessed">
+      <div class="sm:ml-auto sm:text-right">
+        <div id="footerName" class="text-xs font-semibold text-gray-700">Blessed Barber Studio</div>
+        <div id="footerInfo" class="text-[10px] text-gray-400 mt-1">Sistema profesional de reservas.</div>
+      </div>
+    </div>
   </footer>
+</div>
 
-  <div id="modalRoot"></div>
-  <script type="module" src="/app.js"></script>
+<!-- ========================================================= -->
+<!-- APP SHELL: réplica visual del dashboard del otro proyecto  -->
+<!-- ========================================================= -->
+<div id="appShell" class="hidden h-full min-h-screen flex">
+  <div id="sidebarOverlay" class="hidden fixed inset-0 z-30 bg-black/30"></div>
+
+  <aside id="sidebar" class="w-64 bg-gray-900 text-white flex flex-col z-40 shadow-xl" style="min-height:100vh">
+    <div class="p-4 border-b border-gray-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 overflow-hidden p-1">
+          <img id="sbLogo" src="/assets/logo_blessed.png" class="w-full h-full object-contain" alt="Blessed">
+        </div>
+        <div class="min-w-0">
+          <div id="sbName" class="font-semibold text-sm leading-tight truncate">Blessed</div>
+          <div id="sbRole" class="text-xs text-gray-500 truncate">Sistema</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto" id="sidebarNav"></nav>
+
+    <div class="p-3 border-t border-gray-800">
+      <div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-800">
+        <div id="sbAvatar" class="w-8 h-8 rounded-full av-ring flex items-center justify-center text-xs font-bold text-white flex-shrink-0 overflow-hidden">?</div>
+        <div class="flex-1 min-w-0">
+          <div id="sbUserName" class="text-xs font-semibold truncate">Usuario</div>
+          <div id="sbUserRole" class="text-xs text-gray-500 truncate">rol</div>
+        </div>
+      </div>
+      <button id="logoutBtn" class="w-full mt-1 flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-red-400 hover:bg-gray-800 rounded-lg transition">
+        <span>↪</span> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <div id="mainContent" class="flex-1 flex flex-col min-w-0">
+    <header class="h-14 bg-white border-b border-gray-100 flex items-center gap-3 px-4 sticky top-0 z-20 shadow-sm">
+      <button id="mobileSidebarBtn" class="lg:hidden p-1.5 rounded-lg hover:bg-gray-100">☰</button>
+      <div class="flex-1">
+        <h2 id="pageTitle" class="font-semibold text-sm text-gray-900">Dashboard</h2>
+        <p id="pageSubtitle" class="text-xs text-gray-400 hidden sm:block">Vista general del negocio</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button data-route="/reservar" class="hidden sm:flex border border-gray-200 bg-white text-gray-600 text-xs font-semibold px-3 py-2 rounded-lg items-center gap-1.5 hover:bg-gray-50">
+          Portal público
+        </button>
+        <button id="topActionBtn" class="hidden sm:flex bg-primary text-white text-xs font-semibold px-3.5 py-2 rounded-lg items-center gap-1.5 transition hover:bg-primary-dark">
+          <span id="topActionTxt">Nuevo</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="pageContent" class="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50">
+      <div id="dashboardPage" class="admin-page hidden">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="statsGrid"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-semibold text-sm">📈 Reservas de los últimos 7 días</h3>
+                <p class="text-xs text-gray-400 mt-1">Solo actividad de citas</p>
+              </div>
+            </div>
+            <div class="h-64"><canvas id="dashboardChart"></canvas></div>
+          </div>
+
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+            <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">📅 Citas de hoy <span id="todayBadge" class="badge badge-blue">0</span></h3>
+            <div id="todayAgenda" class="space-y-2"></div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+            <h3 class="font-semibold text-sm mb-3">⚡ Acciones rápidas</h3>
+            <div class="space-y-2" id="quickActions"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="reservationsPage" class="admin-page hidden">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-gray-100 flex flex-wrap gap-2 items-center">
+            <input id="reservationSearch" placeholder="Buscar cliente, teléfono, servicio..." class="text-xs border border-gray-200 rounded-lg px-3 py-2 flex-1 min-w-[220px]">
+            <select id="reservationStatus" class="text-xs border border-gray-200 rounded-lg px-3 py-2">
+              <option value="">Todos</option>
+              <option value="reservada">Reservadas</option>
+              <option value="atendida">Atendidas</option>
+            </select>
+            <input id="reservationDate" type="date" class="text-xs border border-gray-200 rounded-lg px-3 py-2">
+          </div>
+          <div id="reservationsTable"></div>
+        </div>
+      </div>
+
+      <div id="calendarPage" class="admin-page hidden">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-gray-100 flex items-center gap-3">
+            <button id="calendarPrev" class="border border-gray-200 rounded-lg px-3 py-2 text-xs">←</button>
+            <div class="flex-1 text-center">
+              <h3 id="calendarTitle" class="font-semibold text-sm">Calendario</h3>
+            </div>
+            <button id="calendarNext" class="border border-gray-200 rounded-lg px-3 py-2 text-xs">→</button>
+          </div>
+          <div class="grid grid-cols-7 border-b border-gray-100 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+            <div class="py-2">Dom</div><div class="py-2">Lun</div><div class="py-2">Mar</div><div class="py-2">Mié</div><div class="py-2">Jue</div><div class="py-2">Vie</div><div class="py-2">Sáb</div>
+          </div>
+          <div id="calendarGrid" class="grid grid-cols-7"></div>
+        </div>
+      </div>
+
+      <div id="barbersPage" class="admin-page hidden">
+        <div id="barbersAdminGrid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+
+      <div id="servicesPage" class="admin-page hidden">
+        <div id="servicesAdminGrid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+
+      <div id="galleryPage" class="admin-page hidden">
+        <div id="galleryAdminGrid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+      </div>
+
+      <div id="agendaPage" class="admin-page hidden">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+          <h3 class="font-semibold text-sm mb-4">📅 Mi agenda</h3>
+          <div id="agendaList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <div id="schedulePage" class="admin-page hidden">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-gray-100">
+            <h3 class="font-semibold text-sm">🕐 Mis horarios disponibles</h3>
+            <p class="text-xs text-gray-400 mt-1">Bloques de una hora</p>
+          </div>
+          <div id="scheduleList" class="p-4 space-y-2"></div>
+        </div>
+      </div>
+
+      <div id="usersPage" class="admin-page hidden">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div id="usersTable"></div>
+        </div>
+      </div>
+
+      <div id="securityPage" class="admin-page hidden">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+          <h3 class="font-semibold text-sm mb-1">🔐 Restablecer contraseñas</h3>
+          <p class="text-xs text-gray-400 mb-4">Disponible únicamente para el Super Admin.</p>
+          <div id="securityList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <div id="configPage" class="admin-page hidden">
+        <div id="configContent"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastContainer" class="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none"></div>
+
+<script type="module" src="/app.js"></script>
 </body>
 </html>
