@@ -1,0 +1,71 @@
+BLESSED BARBER STUDIO - VERSION POR RUTAS
+=========================================
+
+UN SOLO WEB SERVICE DE RENDER.
+
+RUTAS PUBLICAS
+--------------
+/               Home
+/reservar       Reserva pública
+/login          Login del personal
+
+RUTAS PRIVADAS
+--------------
+/panel                  Dashboard
+/panel/agenda           Agenda del barbero
+/panel/horarios         Disponibilidad del barbero
+/panel/reservas         Reservas para admin
+/panel/barberos         Gestión de barberos
+/panel/usuarios         Usuarios para super admin
+/panel/seguridad        Contraseñas para super admin
+/panel/configuracion    Branding y datos del negocio
+
+CONFIGURACION
+-------------
+Ejecutar en Supabase SQL Editor:
+
+supabase/03_configuracion_sistema.sql
+
+Luego el Super Admin puede entrar en:
+/panel/configuracion
+
+y cambiar:
+- Nombre del negocio
+- Subtítulo
+- Teléfono
+- WhatsApp
+- Dirección
+- Horario
+- Título del Home
+- Texto del Home
+- CTA
+- Logo
+- Banner principal
+- Banner secundario
+- Colores
+
+Si todavía no ejecutas el SQL de configuración, el frontend seguirá funcionando
+con los valores predeterminados de config.js.
+
+RENDER
+------
+Seguir usando SOLO el Web Service existente:
+
+Root Directory: backend
+Build Command: npm install
+Start Command: npm start
+
+El backend ya tiene fallback SPA, por lo que abrir directamente:
+/reservar
+/login
+/panel
+etc.
+
+funciona con el mismo servicio.
+
+SUBIR
+-----
+Ejecutar:
+SUBIR_RUTAS_CONFIGURABLE_A_GITHUB.bat
+
+Render hará Auto Deploy.
