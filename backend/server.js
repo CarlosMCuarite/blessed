@@ -18,7 +18,22 @@ const app = express();
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      // app.js importa el SDK de Supabase como módulo ES desde jsdelivr.
+      scriptSrc: ["'self'", 'https://cdn.jsdelivr.net'],
+      // Auth/REST/Storage de Supabase (y Realtime por WebSocket).
+      connectSrc: ["'self'", 'https://*.supabase.co', 'wss://*.supabase.co'],
+      // Fotos del catálogo y banners: pueden venir de Supabase Storage.
+      imgSrc: ["'self'", 'data:', 'https:'],
+      // El panel usa atributos style="" inline en varias vistas.
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      fontSrc: ["'self'", 'data:'],
+    },
+  },
+}));
 app.use(cors({
   origin: (origin, callback) => {
     const configured = (process.env.FRONTEND_ORIGIN || '')
