@@ -1,0 +1,55 @@
+BLESSED - FORMATO EXTRAÍDO Y REDISEÑADO DESDE barberos-sistema-main
+==================================================================
+
+SE TOMÓ DEL OTRO PROYECTO SOLO EL FORMATO / EXPERIENCIA DE:
+- Login de personal
+- Sidebar + topbar del panel
+- Dashboard
+- Reservas guiadas por pasos
+- Equipo / barberos
+- Horarios
+- Catálogo de servicios
+- Galería
+- Configuración agrupada
+
+SE EXCLUYÓ COMPLETAMENTE:
+- Inventario
+- Productos
+- Facturación
+- Gastos
+- Finanzas
+- Reportes
+- IA
+- Backups / restore
+- Gestión independiente de clientes
+
+ARQUITECTURA CONSERVADA:
+- Supabase Auth + PostgreSQL + Storage
+- Backend Node/Express
+- Un único Web Service en Render
+- FCM preparado para la app
+- Roles: super_admin, admin, barbero
+
+ANTES DE USAR EL NUEVO CATÁLOGO:
+Ejecutar una vez en Supabase SQL Editor:
+supabase/05_formato_barberos_catalogo.sql
+
+IMPORTANTE:
+No agrega servicios de muestra. Debes entrar como admin/super admin y crearlos
+desde Panel -> Catálogo.
+
+RUTAS:
+/
+ /catalogo
+ /reservar
+ /login
+ /panel
+ /panel/reservas
+ /panel/barberos
+ /panel/catalogo
+ /panel/galeria
+ /panel/agenda
+ /panel/horarios
+ /panel/usuarios
+ /panel/seguridad
+ /panel/configuracion

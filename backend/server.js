@@ -150,11 +150,17 @@ const newUserSchema = z.object({
   nombre: z.string().trim().min(2).max(100),
   telefono: z.string().trim().min(6).max(30).nullable().optional(),
   rol: z.enum(['admin', 'barbero']).default('barbero'),
+  especialidad: z.string().trim().max(120).nullable().optional(),
+  bio: z.string().trim().max(600).nullable().optional(),
+  foto_url: z.string().trim().max(1000).nullable().optional(),
 });
 
 const editUserSchema = z.object({
   nombre: z.string().trim().min(2).max(100).optional(),
   telefono: z.string().trim().min(6).max(30).nullable().optional(),
+  especialidad: z.string().trim().max(120).nullable().optional(),
+  bio: z.string().trim().max(600).nullable().optional(),
+  foto_url: z.string().trim().max(1000).nullable().optional(),
   activo: z.boolean().optional(),
 }).refine((v) => Object.keys(v).length > 0, 'Sin cambios');
 
@@ -167,7 +173,7 @@ app.get('/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'barberia-profesional-api',
-    version: '2.1.0',
+    version: '3.0.0',
     supabase: 'configured',
     notifications: messaging ? 'enabled' : 'disabled',
   });
@@ -310,6 +316,9 @@ app.post('/api/users', requireRoles('admin', 'super_admin'), async (req, res) =>
       nombre: input.nombre,
       telefono: input.telefono ?? null,
       rol: input.rol,
+      especialidad: input.especialidad ?? null,
+      bio: input.bio ?? null,
+      foto_url: input.foto_url ?? null,
       activo: true,
     });
 
@@ -355,7 +364,7 @@ app.patch('/api/users/:id', requireRoles('admin', 'super_admin'), async (req, re
       .from('usuarios')
       .update(parsed.data)
       .eq('id', req.params.id)
-      .select('id,nombre,rol,telefono,activo')
+      .select('id,nombre,rol,telefono,especialidad,bio,foto_url,activo')
       .single();
 
     if (updateError) return res.status(400).json({ error: updateError.message });
@@ -428,5 +437,5 @@ app.use((req, res, next) => {
 });
 
 app.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`Barbería API v2.1 escuchando en ${PORT}`);
+  console.log(`Barbería API v3.0 escuchando en ${PORT}`);
 });
